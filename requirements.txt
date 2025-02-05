@@ -1,0 +1,11 @@
+streamlit
+opencv-python
+numpy
+torch
+requests
+json5  # json is built-in, but json5 supports extended JSON syntax
+easyocr
+pillow  # for PIL
+torchvision
+transformers
+base64
