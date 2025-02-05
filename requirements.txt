@@ -1,5 +1,6 @@
 streamlit==1.39.0
 opencv-python==4.5.5.64
+opencv-python-headless==4.5.4.60
 numpy==1.26.4
 torch==2.5.0
 requests
