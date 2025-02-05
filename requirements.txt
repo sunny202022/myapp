@@ -1,12 +1,10 @@
 python==3.10.11
-streamlit
-opencv-python
-numpy
-torch
+opencv-python==4.5.5.64
+numpy==1.26.4
+torch==2.5.0
 requests
-json5  # json is built-in, but json5 supports extended JSON syntax
 easyocr
-pillow  # for PIL
-torchvision
-transformers
+pillow
+torchvision==0.20.0
+transformers==4.24.0
 base64
