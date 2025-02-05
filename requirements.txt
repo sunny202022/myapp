@@ -6,4 +6,3 @@ easyocr
 pillow
 torchvision==0.20.0
 transformers==4.24.0
-base64
