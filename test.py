@@ -469,8 +469,8 @@ with tab2:
                     
                     age = st.number_input("Enter your age", min_value=1, max_value=100, step=1)
                     gender = st.selectbox("Select your gender", ["Male", "Female", "Other"])
-                    height = st.number_input("Enter your height (cm)", min_value=50, max_value=250, step=1)
-                    weight = st.number_input("Enter your weight (kg)", min_value=50, max_value=300, step=1)
+                    height = st.number_input("Enter your height (cm)", min_value=25, max_value=250, step=1)
+                    weight = st.number_input("Enter your weight (kg)", min_value=5, max_value=300, step=1)
                     
                     activity_level = st.selectbox("Select your activity level", [
                         "Sedentary (little or no exercise)",
