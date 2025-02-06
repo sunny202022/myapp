@@ -343,121 +343,74 @@ with tab1:
             return None
 
     # Process and generate recipe for each uploaded image
+        
+    def get_loading_gif():
+        with open("images/12.gif", "rb") as gif_file:
+            base64_gif = base64.b64encode(gif_file.read()).decode("utf-8")
+        return base64_gif
+
     if uploaded_files:
-        ingredients = []
-        for uploaded_file in uploaded_files:
-            image = Image.open(uploaded_file)
-            image = np.array(image)
-
-            product_name, is_classification = process_image(image, groq)
-            if product_name:
-                ingredients.append(product_name)
-            else:
-                st.warning(f"Could not detect a product name from the image. Using classification result: {is_classification}")
-
-        # Show the "Get Recipe" button after images are uploaded
         if st.button('Get Recipe'):
+            loading_placeholder = st.empty()
+            
+            # Display GIF loader
+            loading_placeholder.markdown(
+                f"""
+                <div style="display: flex;">
+                    <img src="data:image/gif;base64,{get_loading_gif()}" width="150px" />
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            ingredients = []
+            for uploaded_file in uploaded_files:
+                image = Image.open(uploaded_file)
+                image = np.array(image)
+
+                product_name, is_classification = process_image(image, groq)
+                if product_name:
+                    ingredients.append(product_name)
+                else:
+                    st.warning(f"Could not detect a product name from the image. Using classification result: {is_classification}")
+
             if ingredients:
                 recipe = generate_recipe(ingredients, groq)
-                def parse_recipe_response(recipe):
-                    try:
-                        lines = recipe.strip().split('\n')
-                        
-                        recipe_name = lines[0].replace('Generated Recipe:', '').strip() if lines else 'Unknown Recipe'
-                        extra_ingredients = []
-                        instructions = []
-                        cooking_time = ''
-                        nutrition = ''
-                            
-                        parsing_extra_ingredients = False
-                        parsing_instructions = False
-                        parsing_nutrition = False
-
-                        for line in lines[1:]:
-                            line = line.strip()
-                            if line.lower().startswith('ingredients:'):
-                                parsing_extra_ingredients = True
-                                parsing_instructions = parsing_nutrition = False
-                                continue
-                            elif line.lower().startswith('instructions:'):
-                                parsing_instructions = True
-                                parsing_extra_ingredients = parsing_nutrition = False
-                                continue
-                            elif line.lower().startswith('cooking time:'):
-                                cooking_time = line[len('Cooking Time:'):].strip()
-                                parsing_extra_ingredients = parsing_instructions = parsing_nutrition = False
-                                continue
-                            elif line.lower().startswith('nutritional information:'):
-                                parsing_nutrition = True
-                                parsing_extra_ingredients = parsing_instructions = False
-                                continue
-                                
-                            # Append extra ingredients
-                            if parsing_extra_ingredients and line:
-                                extra_ingredients.append(line)
-                                
-                                # Append instructions
-                            elif parsing_instructions and line:
-                                instructions.append(line)
-                                    
-                                # Append nutrition information
-                            elif parsing_nutrition and line:
-                                nutrition += line + ' '  # Concatenate multiple lines for nutrition
-
-                        return recipe_name, ' '.join(extra_ingredients), ' '.join(instructions), cooking_time, nutrition.strip()
-                    except Exception as e:
-                        st.error(f"Error parsing recipe response: {e}")
-                        return None, None, None, None, None
+                loading_placeholder.empty()  # Remove GIF loader when response is received
+                
                 if recipe:
-                    # Regular expressions to extract sections from the recipe text
+                    # Extracting sections using regular expressions
                     recipe_name = re.search(r'\*\*Recipe Name:\*\* (.*)', recipe)
                     category = re.search(r'\*\*Category:\*\* (.*)', recipe)
                     ingredients = re.search(r'\*\*Ingredients:\*\*([\s\S]*?)\*\*Instructions:', recipe)
                     instructions = re.search(r'\*\*Instructions:\*\*([\s\S]*?)\*\*Cooking Time:', recipe)
                     cooking_time = re.search(r'\*\*Cooking Time:\*\* (.*)', recipe)
                     nutrition = re.search(r'\*\*Nutritional Information \(per serving\):\*\*([\s\S]*)', recipe)
-
-                    # Displaying recipe sections in a white transparent box
+                    
+                    # Display recipe content
                     st.markdown("<h1 style='font-size: 35px;'>Generated Recipe:</h1>", unsafe_allow_html=True)
-
-                    # Create the transparent white box style
+                    
                     recipe_html = """
                     <div style="background-color: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
                     """
                     
-                    # Recipe Name
                     if recipe_name:
                         recipe_html += f"<p style='font-size: 20px;'>Recipe Name:</p><p style='font-size: 16px;'>{recipe_name.group(1)}</p>"
-
-                    # Category
                     if category:
                         recipe_html += f"<p style='font-size: 20px;'>Category:</p><p style='font-size: 16px;'>{category.group(1)}</p>"
-
-                    # Ingredients
                     if ingredients:
                         formatted_ingredients = ingredients.group(1).strip().replace("*", "").replace("\n", "<br>")
                         recipe_html += f"<p style='font-size: 20px;'>Ingredients:</p><p style='font-size: 16px;'>{formatted_ingredients}</p>"
-
-                    # Instructions
                     if instructions:
                         formatted_instructions = instructions.group(1).strip().replace("\n", "<br>")
                         recipe_html += f"<p style='font-size: 20px;'>Instructions:</p><p style='font-size: 16px;'>{formatted_instructions}</p>"
-
-                    # Cooking Time
                     if cooking_time:
-                        recipe_html += f"<p style='font-size: 20px;'>Cooking Time:</p><p style='font-size: 16x;'>{cooking_time.group(1)}</p>"
-
-                    # Nutritional Information
+                        recipe_html += f"<p style='font-size: 20px;'>Cooking Time:</p><p style='font-size: 16px;'>{cooking_time.group(1)}</p>"
                     if nutrition:
                         formatted_nutrition = nutrition.group(1).strip().replace("*", "").replace("\n", "<br>")
                         recipe_html += f"<p style='font-size: 20px;'>Nutritional Information (per serving):</p><p style='font-size: 16px;'>{formatted_nutrition}</p>"
-
-                    # Close the transparent white box
+                    
                     recipe_html += "</div>"
-
-                    # Display the recipe in the styled container
                     st.markdown(recipe_html, unsafe_allow_html=True)
-
 
 with tab2:
                 # Title
